@@ -252,4 +252,51 @@ class Film extends \yii\db\ActiveRecord
     {
         $this->rating = self::RATING_NC_17;
     }
+
+    // Stored Procedure Methods
+    public static function getAllFilmsFromSP()
+    {
+        return Yii::$app->db->createCommand('CALL GetAllFilms()')->queryAll();
+    }
+
+    public static function getFilmByIdFromSP($id)
+    {
+        return Yii::$app->db->createCommand('CALL GetFilmById(:id)', [':id' => $id])->queryOne();
+    }
+
+    public function insertFilmWithSP()
+    {
+        return Yii::$app->db->createCommand('CALL InsertFilm(:title, :description, :release_year, :language_id, :rental_duration, :rental_rate, :length, :replacement_cost, :rating)', [
+            ':title' => $this->title,
+            ':description' => $this->description,
+            ':release_year' => $this->release_year,
+            ':language_id' => $this->language_id,
+            ':rental_duration' => $this->rental_duration,
+            ':rental_rate' => $this->rental_rate,
+            ':length' => $this->length,
+            ':replacement_cost' => $this->replacement_cost,
+            ':rating' => $this->rating
+        ])->execute();
+    }
+
+    public function updateFilmWithSP()
+    {
+        return Yii::$app->db->createCommand('CALL UpdateFilm(:film_id, :title, :description, :release_year, :language_id, :rental_duration, :rental_rate, :length, :replacement_cost, :rating)', [
+            ':film_id' => $this->film_id,
+            ':title' => $this->title,
+            ':description' => $this->description,
+            ':release_year' => $this->release_year,
+            ':language_id' => $this->language_id,
+            ':rental_duration' => $this->rental_duration,
+            ':rental_rate' => $this->rental_rate,
+            ':length' => $this->length,
+            ':replacement_cost' => $this->replacement_cost,
+            ':rating' => $this->rating
+        ])->execute();
+    }
+
+    public static function deleteFilmWithSP($id)
+    {
+        return Yii::$app->db->createCommand('CALL DeleteFilm(:id)', [':id' => $id])->execute();
+    }
 }

@@ -32,37 +32,40 @@ class FilmController extends Controller
     }
 
     /**
-     * Lists all Film models.
+     * Lists all Film models using stored procedure.
      *
      * @return string
      */
     public function actionIndex()
     {
-        $searchModel = new FilmSearch();
-        $dataProvider = $searchModel->search($this->request->queryParams);
-
+        $films = Film::getAllFilmsFromSP();
+        
         return $this->render('index', [
-            'searchModel' => $searchModel,
-            'dataProvider' => $dataProvider,
+            'films' => $films,
         ]);
     }
 
     /**
-     * Displays a single Film model.
+     * Displays a single Film model using stored procedure.
      * @param int $film_id Film ID
      * @return string
      * @throws NotFoundHttpException if the model cannot be found
      */
     public function actionView($film_id)
     {
+        $filmData = Film::getFilmByIdFromSP($film_id);
+        if (!$filmData) {
+            throw new NotFoundHttpException('The requested page does not exist.');
+        }
+        
         return $this->render('view', [
-            'model' => $this->findModel($film_id),
+            'model' => (object) $filmData,
         ]);
     }
 
     /**
-     * Creates a new Film model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
+     * Creates a new Film model using stored procedure.
+     * If creation is successful, the browser will be redirected to the 'index' page.
      * @return string|\yii\web\Response
      */
     public function actionCreate()
@@ -70,8 +73,9 @@ class FilmController extends Controller
         $model = new Film();
 
         if ($this->request->isPost) {
-            if ($model->load($this->request->post()) && $model->save()) {
-                return $this->redirect(['view', 'film_id' => $model->film_id]);
+            if ($model->load($this->request->post()) && $model->validate()) {
+                $model->insertFilmWithSP();
+                return $this->redirect(['index']);
             }
         } else {
             $model->loadDefaultValues();
@@ -83,7 +87,7 @@ class FilmController extends Controller
     }
 
     /**
-     * Updates an existing Film model.
+     * Updates an existing Film model using stored procedure.
      * If update is successful, the browser will be redirected to the 'view' page.
      * @param int $film_id Film ID
      * @return string|\yii\web\Response
@@ -93,7 +97,8 @@ class FilmController extends Controller
     {
         $model = $this->findModel($film_id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($this->request->isPost && $model->load($this->request->post()) && $model->validate()) {
+            $model->updateFilmWithSP();
             return $this->redirect(['view', 'film_id' => $model->film_id]);
         }
 
@@ -103,7 +108,7 @@ class FilmController extends Controller
     }
 
     /**
-     * Deletes an existing Film model.
+     * Deletes an existing Film model using stored procedure.
      * If deletion is successful, the browser will be redirected to the 'index' page.
      * @param int $film_id Film ID
      * @return \yii\web\Response
@@ -111,8 +116,7 @@ class FilmController extends Controller
      */
     public function actionDelete($film_id)
     {
-        $this->findModel($film_id)->delete();
-
+        Film::deleteFilmWithSP($film_id);
         return $this->redirect(['index']);
     }
 
