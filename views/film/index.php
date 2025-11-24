@@ -44,8 +44,9 @@ $this->params['breadcrumbs'][] = $this->title;
             //'last_update',
             [
                 'class' => ActionColumn::className(),
-                'urlCreator' => function ($action, Film $model, $key, $index, $column) {
-                    return Url::toRoute([$action, 'film_id' => $model->film_id]);
+                'urlCreator' => function ($action, $model, $key, $index, $column) {
+                    $filmId = is_array($model) ? $model['film_id'] : $model->film_id;
+                    return Url::toRoute([$action, 'film_id' => $filmId]);
                  }
             ],
         ],

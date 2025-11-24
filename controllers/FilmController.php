@@ -38,9 +38,18 @@ class FilmController extends Controller
      */
     public function actionIndex()
     {
+        $searchModel = new FilmSearch();
         $films = Film::getAllFilmsFromSP();
         
-        return $this->render('index', [
+        // Convert array data to ActiveDataProvider format
+        $dataProvider = new \yii\data\ArrayDataProvider([
+            'allModels' => $films,
+            'pagination' => [
+                'pageSize' => 20,
+            ],
+        ]);
+        
+        return $this->render('index-sp', [
             'films' => $films,
         ]);
     }
@@ -58,8 +67,8 @@ class FilmController extends Controller
             throw new NotFoundHttpException('The requested page does not exist.');
         }
         
-        return $this->render('view', [
-            'model' => (object) $filmData,
+        return $this->render('view-sp', [
+            'film' => $filmData,
         ]);
     }
 
